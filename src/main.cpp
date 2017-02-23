@@ -9,7 +9,7 @@
 void playRound(BoardState &bs)
 {
     std::vector<char> figures = {'A','B','C','D','E'};
-    randomutils::shuffleArray(figures);
+    randomutils::shuffleVector(figures);
     while (!figures.empty())
     {
         int steps = randomutils::getNumberFromInterval(1, 3);
