@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+namespace board
+{
+
 BoardState::BoardState() : track(TRACK_LENGTH)
 {
 }
@@ -26,8 +29,9 @@ bool BoardState::isRaceOver()
     return track.size() > TRACK_LENGTH ? true : false;
 }
 
-void BoardState::moveFigure(char figure, int steps)
+int BoardState::moveFigure(Figures figure, int steps)
 {
+    int triggeredBonusTile = 0;
     // go through the track tiles
     for (unsigned int i = 0; i < TRACK_LENGTH; i++)
     {
@@ -35,7 +39,7 @@ void BoardState::moveFigure(char figure, int steps)
         for (unsigned int j = 0; j < track.at(i).size(); j++)
         {
             // find match
-            if (track.at(i).at(j) == figure)
+            if (track.at(i).at(j) == (char)figure)
             {
                 // check if race will be over with this move
                 if ((i + steps) >= TRACK_LENGTH)
@@ -45,12 +49,22 @@ void BoardState::moveFigure(char figure, int steps)
                     // add extra tile after finish line
                     track.push_back({'>'});
                 }
-                // check extra tile placement first
+                // check for placed bonus tiles before moving
                 if (!track.at(i + steps).empty())
                 {
-                    char tileContent = track.at(i + steps).at(0);
-                    if (tileContent == '+') steps++;
-                    if (tileContent == '-') steps--;
+                    unsigned int plannedPosition = i + steps;
+                    char tileContent = track.at(plannedPosition).at(0);
+                    // if a bonus tile was triggered return real position instead of vector index
+                    if (tileContent == (char)Bonuses::PLUS)
+                    {
+                        triggeredBonusTile = plannedPosition + 1;
+                        steps++;
+                    }
+                    if (tileContent == (char)Bonuses::MINUS)
+                    {
+                        triggeredBonusTile = plannedPosition + 1;
+                        steps--;
+                    }
                 }
                 // now move figure
                 auto newPosition = track.at(i + steps).end();
@@ -62,20 +76,22 @@ void BoardState::moveFigure(char figure, int steps)
                 // erase old position and exit
                 auto oldFigurePosition = track.at(i).begin() + j;
                 track.at(i).erase(oldFigurePosition, oldFigurePosition + carriedFigures);
-                return;
+                // we are done
+                return triggeredBonusTile;
             }
         }
     }
-    // no match so far means we only started the game, place figure directly
-    track.at(steps - 1).push_back(figure);
+    // no match for figure means we only started the game, place figure directly
+    track.at(steps - 1).push_back((char)figure);
+    return triggeredBonusTile;
 }
 
-int BoardState::placeBonusTile(char tile, int position)
+int BoardState::placeBonusTile(Bonuses tile, int position)
 {
     //TODO: handle flipping your existing tile
     //TODO: handle tile ownership
 
-    // logical index vs. code index
+    // real positions start at 1, but vector indices start at 0
     position--;
     // check boundaries
     if (position < 0 || position >= TRACK_LENGTH)
@@ -95,11 +111,11 @@ int BoardState::placeBonusTile(char tile, int position)
         {
             tileContentRight = track.at(position + 1).at(0);
         }
-        // make sure no adjacent extra tiles
-        if (tileContentLeft != '+' && tileContentLeft != '-' &&
-            tileContentRight != '+' && tileContentRight != '-')
+        // make sure no adjacent bonus tiles
+        if (tileContentLeft != (char)Bonuses::PLUS && tileContentLeft != (char)Bonuses::MINUS &&
+            tileContentRight != (char)Bonuses::PLUS && tileContentRight != (char)Bonuses::MINUS)
         {
-            track.at(position).push_back(tile);
+            track.at(position).push_back((char)tile);
             return 0;
         }
         else
@@ -110,9 +126,9 @@ int BoardState::placeBonusTile(char tile, int position)
     return -1;
 }
 
-std::vector<tileStack> BoardState::stateToTrack(const std::string &state)
+std::vector<std::vector<char> > BoardState::stateToTrack(const std::string &state)
 {
-    std::vector<tileStack> track(TRACK_LENGTH);
+    std::vector<std::vector<char>> track(TRACK_LENGTH);
     int tileIndex = 0;
     for (char c : state)
     {
@@ -129,10 +145,10 @@ std::vector<tileStack> BoardState::stateToTrack(const std::string &state)
     return track;
 }
 
-std::string BoardState::trackToState(const std::vector<tileStack> &track)
+std::string BoardState::trackToState(const std::vector<std::vector<char> > &track)
 {
     std::string state;
-    for (tileStack tile : track)
+    for (std::vector<char> tile : track)
     {
         while (!tile.empty())
         {
@@ -143,3 +159,5 @@ std::string BoardState::trackToState(const std::vector<tileStack> &track)
     }
     return state;
 }
+
+} // namespace board
