@@ -148,14 +148,23 @@ std::vector<std::vector<char> > BoardState::stateToTrack(const std::string &stat
 std::string BoardState::trackToState(const std::vector<std::vector<char> > &track)
 {
     std::string state;
+    bool extraFinishTile = false;
     for (std::vector<char> tile : track)
     {
         while (!tile.empty())
         {
+            if (tile.front() == '>') extraFinishTile = true;
             state += tile.front();
             tile.erase(tile.begin());
         }
-        state += ';';
+        if (extraFinishTile)
+        {
+            state += '<';
+        }
+        else
+        {
+            state += ';';
+        }
     }
     return state;
 }
