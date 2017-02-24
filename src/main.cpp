@@ -1,39 +1,40 @@
 #include <unistd.h>
-#include <boardstate.h>
+#include <board.h>
 #include <randomutils.h>
 
 #include <iostream>
 
 #define FIGURE_COUNT 5
 
-void playRound(board::BoardState &bs)
+void playRound(Board &bs)
 {
-    std::vector<board::Figures> figures = {board::Figures::BLUE, board::Figures::GREEN,
-                                           board::Figures::ORANGE, board::Figures::WHITE,
-                                           board::Figures::YELLOW};
+    std::vector<elements::Figures> figures =
+    {
+        elements::Figures::BLUE, elements::Figures::GREEN, elements::Figures::ORANGE,
+        elements::Figures::WHITE, elements::Figures::YELLOW
+    };
     randomutils::shuffleVector(figures);
     while (!figures.empty())
     {
         int steps = randomutils::getNumberFromInterval(1, 3);
-        board::Figures figure = figures.back();
+        elements::Figures figure = figures.back();
         figures.pop_back();
 
         std::cout << "moving " << (char)figure << " for " << steps <<
                      " | bonus on " << bs.moveFigure(figure, steps) << std::endl;
         std::cout << bs.getState() << std::endl;
-        //sleep(1);
-
-        if (bs.isRaceOver()) return;
+        sleep(1);
     }
     std::cout << "=====================" << std::endl;
+    if (bs.isRaceOver()) return;
 }
 
 int main()
 {
-    board::BoardState bs;
+    Board bs;
 
-    bs.placeBonusTile(board::Bonuses::PLUS, 5);
-    bs.placeBonusTile(board::Bonuses::MINUS, 10);
+    bs.placeBonusTile(elements::Bonuses::PLUS, 5);
+    bs.placeBonusTile(elements::Bonuses::MINUS, 10);
 
     std::cout << "Starting..." << std::endl;
 

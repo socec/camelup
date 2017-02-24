@@ -21,7 +21,7 @@ int getNumberFromInterval(int start, int end)
 }
 
 /**
- * Shuffles the given vector.
+ * Shuffles elements of the given vector.
  */
 template <typename T> void shuffleVector(std::vector<T> &array)
 {

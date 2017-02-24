@@ -1,35 +1,30 @@
-#include <boardstate.h>
+#include <board.h>
 
-#include <iostream>
-
-namespace board
-{
-
-BoardState::BoardState() : track(TRACK_LENGTH)
+Board::Board() : track(TRACK_LENGTH)
 {
 }
 
-void BoardState::setState(const std::string &newState)
+void Board::setState(const std::string &newState)
 {
     state = newState;
     // update track based on new state
     track = stateToTrack(state);
 }
 
-std::string BoardState::getState()
+std::string Board::getState()
 {
     // updated state based on current track status
     state = trackToState(track);
     return state;
 }
 
-bool BoardState::isRaceOver()
+bool Board::isRaceOver()
 {
     // check for extra position appended when race is over
     return track.size() > TRACK_LENGTH ? true : false;
 }
 
-int BoardState::moveFigure(const Figures figure, int steps)
+int Board::moveFigure(const elements::Figures figure, int steps)
 {
     int triggeredBonusTile = 0;
     // go through the track positions
@@ -56,12 +51,12 @@ int BoardState::moveFigure(const Figures figure, int steps)
                     char alreadyPlaced = track.at(plannedPosition).at(0);
                     // if a bonus tile was triggered adjust the steps and return real position
                     // instead of vector index
-                    if (alreadyPlaced == (char)Bonuses::PLUS)
+                    if (alreadyPlaced == (char)elements::Bonuses::PLUS)
                     {
                         triggeredBonusTile = plannedPosition + 1;
                         steps++;
                     }
-                    if (alreadyPlaced == (char)Bonuses::MINUS)
+                    if (alreadyPlaced == (char)elements::Bonuses::MINUS)
                     {
                         triggeredBonusTile = plannedPosition + 1;
                         steps--;
@@ -87,7 +82,7 @@ int BoardState::moveFigure(const Figures figure, int steps)
     return triggeredBonusTile;
 }
 
-int BoardState::placeBonusTile(const Bonuses tile, int position)
+int Board::placeBonusTile(const elements::Bonuses tile, int position)
 {
     //TODO: handle flipping your existing tile
     //TODO: handle tile ownership
@@ -113,8 +108,10 @@ int BoardState::placeBonusTile(const Bonuses tile, int position)
             placedRight = track.at(position + 1).at(0);
         }
         // make sure no adjacent bonus tiles
-        if (placedLeft != (char)Bonuses::PLUS && placedLeft != (char)Bonuses::MINUS &&
-            placedRight != (char)Bonuses::PLUS && placedRight != (char)Bonuses::MINUS)
+        if (placedLeft != (char)elements::Bonuses::PLUS &&
+            placedLeft != (char)elements::Bonuses::MINUS &&
+            placedRight != (char)elements::Bonuses::PLUS &&
+            placedRight != (char)elements::Bonuses::MINUS)
         {
             track.at(position).push_back((char)tile);
             return 0;
@@ -127,7 +124,7 @@ int BoardState::placeBonusTile(const Bonuses tile, int position)
     return -1;
 }
 
-std::vector<std::vector<char> > BoardState::stateToTrack(const std::string &state)
+std::vector<std::vector<char> > Board::stateToTrack(const std::string &state)
 {
     std::vector<std::vector<char>> track(TRACK_LENGTH);
     int position = 0;
@@ -146,7 +143,7 @@ std::vector<std::vector<char> > BoardState::stateToTrack(const std::string &stat
     return track;
 }
 
-std::string BoardState::trackToState(const std::vector<std::vector<char> > &track)
+std::string Board::trackToState(const std::vector<std::vector<char> > &track)
 {
     std::string state;
     for (std::vector<char> position : track)
@@ -165,5 +162,3 @@ std::string BoardState::trackToState(const std::vector<std::vector<char> > &trac
     }
     return state;
 }
-
-} // namespace board
