@@ -40,18 +40,18 @@ public:
 
     /**
      * @brief Moves a figure on the board. The figure will be placed on the board if not there yet.
-     * @param figure Character representing the figure.
+     * @param figure Figure to move.
      * @param steps Number of steps the figure moves.
-     * @return Board location of a bonus tile if triggered while moving, otherwise 0;
+     * @return Position of a bonus tile on the board if triggered while moving, otherwise 0;
      */
-    int moveFigure(Figures figure, int steps);
+    int moveFigure(const Figures figure, int steps);
     /**
      * @brief Places a bonus tile on the given board location.
-     * @param tile Character representing the bonus tile.
+     * @param tile Bonus tile to place.
      * @param position Location of the bonus tile.
      * @return In case of illegal placement -1, otherwise 0.
      */
-    int placeBonusTile(Bonuses tile, int position);
+    int placeBonusTile(const Bonuses tile, int position);
 
 private:
     std::string state;

@@ -21,7 +21,7 @@ void playRound(board::BoardState &bs)
         std::cout << "moving " << (char)figure << " for " << steps <<
                      " | bonus on " << bs.moveFigure(figure, steps) << std::endl;
         std::cout << bs.getState() << std::endl;
-        sleep(1);
+        //sleep(1);
 
         if (bs.isRaceOver()) return;
     }
