@@ -1,47 +1,43 @@
 #include <unistd.h>
 #include <track.h>
-#include <randomutils.h>
+#include <legdice.h>
 
 #include <iostream>
 
-#define FIGURE_COUNT 5
-
-void playRound(Track &bs)
-{
-    std::vector<elements::Figures> figures =
-    {
-        elements::Figures::BLUE, elements::Figures::GREEN, elements::Figures::ORANGE,
-        elements::Figures::WHITE, elements::Figures::YELLOW
-    };
-    randomutils::shuffleVector(figures);
-    while (!figures.empty())
-    {
-        int spaces = randomutils::getNumberFromInterval(1, 3);
-        elements::Figures figure = figures.back();
-        figures.pop_back();
-
-        std::cout << "moving " << (char)figure << " for " << spaces <<
-                     " | bonus on " << bs.moveFigure(figure, spaces) << std::endl;
-        std::cout << bs.getState() << std::endl;
-        //sleep(1);
-        if (bs.isRaceOver()) break;
-    }
-    std::cout << "=====================" << std::endl;
-}
-
 int main()
 {
-    Track bs;
+    Track track;
+    LegDice legdice;
 
-    bs.placeBonusTile(elements::BonusTiles::PLUS, 5);
-    bs.placeBonusTile(elements::BonusTiles::MINUS, 10);
+    track.placeBonusTile(elements::BonusTiles::PLUS, 1);
+    track.placeBonusTile(elements::BonusTiles::MINUS, 10);
 
     std::cout << "Starting..." << std::endl;
 
     while (1)
     {
-        playRound(bs);
-        if (bs.isRaceOver()) break;
+        if (legdice.isLegOver())
+        {
+            legdice.reset();
+            std::cout << "=====================" << std::endl;
+        }
+
+        Die die;
+        legdice.revealNextDie(die);
+
+        std::cout << "moving " << (char)die.figure << " for " << die.spaces
+                  << " | bonus on " << track.moveFigure(die.figure, die.spaces)
+                  << " | dice played " << legdice.getRevealedDice()
+                  << " | dice left " << legdice.getRemainingDice() << std::endl;
+        std::cout << track.getState() << std::endl;
+
+        if (track.isRaceOver())
+        {
+            std::cout << "=====================" << std::endl;
+            break;
+        }
+
+        //sleep(1);
     }
 
     std::cout << "Done!" << std::endl;
