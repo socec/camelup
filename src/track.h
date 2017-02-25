@@ -53,6 +53,7 @@ public:
 private:
     std::string state;
     std::vector<std::vector<char>> track;
+    bool raceIsOver;
 
     std::vector<std::vector<char>> stateToTrack(const std::string &state);
     std::string trackToState(const std::vector<std::vector<char>> &track);

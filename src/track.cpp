@@ -1,6 +1,6 @@
 #include <track.h>
 
-Track::Track() : track(TRACK_LENGTH)
+Track::Track() : track(TRACK_LENGTH), raceIsOver(false)
 {
 }
 
@@ -20,8 +20,7 @@ std::string Track::getState()
 
 bool Track::isRaceOver()
 {
-    // check for extra space appended when race is over
-    return track.size() > TRACK_LENGTH ? true : false;
+    return raceIsOver;
 }
 
 int Track::moveFigure(const elements::Figures figure, int spaces)
@@ -43,6 +42,7 @@ int Track::moveFigure(const elements::Figures figure, int spaces)
                     spaces = TRACK_LENGTH - i;
                     // add extra "space" after finish line
                     track.push_back({(char) elements::StateChars::WINSTART});
+                    raceIsOver = true;
                 }
                 // check for placed bonus tiles before moving
                 unsigned int plannedSpace = i + spaces;
