@@ -1,12 +1,12 @@
 #include <unistd.h>
-#include <board.h>
+#include <track.h>
 #include <randomutils.h>
 
 #include <iostream>
 
 #define FIGURE_COUNT 5
 
-void playRound(Board &bs)
+void playRound(Track &bs)
 {
     std::vector<elements::Figures> figures =
     {
@@ -16,25 +16,25 @@ void playRound(Board &bs)
     randomutils::shuffleVector(figures);
     while (!figures.empty())
     {
-        int steps = randomutils::getNumberFromInterval(1, 3);
+        int spaces = randomutils::getNumberFromInterval(1, 3);
         elements::Figures figure = figures.back();
         figures.pop_back();
 
-        std::cout << "moving " << (char)figure << " for " << steps <<
-                     " | bonus on " << bs.moveFigure(figure, steps) << std::endl;
+        std::cout << "moving " << (char)figure << " for " << spaces <<
+                     " | bonus on " << bs.moveFigure(figure, spaces) << std::endl;
         std::cout << bs.getState() << std::endl;
-        sleep(1);
+        //sleep(1);
+        if (bs.isRaceOver()) break;
     }
     std::cout << "=====================" << std::endl;
-    if (bs.isRaceOver()) return;
 }
 
 int main()
 {
-    Board bs;
+    Track bs;
 
-    bs.placeBonusTile(elements::Bonuses::PLUS, 5);
-    bs.placeBonusTile(elements::Bonuses::MINUS, 10);
+    bs.placeBonusTile(elements::BonusTiles::PLUS, 5);
+    bs.placeBonusTile(elements::BonusTiles::MINUS, 10);
 
     std::cout << "Starting..." << std::endl;
 
