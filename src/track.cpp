@@ -42,7 +42,7 @@ int Track::moveFigure(const elements::Figures figure, int spaces)
                     // adjust to make only one step after finish line
                     spaces = TRACK_LENGTH - i;
                     // add extra "space" after finish line
-                    track.push_back({'>'});
+                    track.push_back({(char) elements::StateChars::WINSTART});
                 }
                 // check for placed bonus tiles before moving
                 unsigned int plannedSpace = i + spaces;
@@ -132,7 +132,7 @@ std::vector<std::vector<char> > Track::stateToTrack(const std::string &state)
     for (char c : state)
     {
         // detect separators to change space
-        if (c == ';')
+        if (c == (char)elements::StateChars::SEPARATOR)
         {
             space ++;
             continue;
@@ -158,13 +158,13 @@ std::string Track::trackToState(const std::vector<std::vector<char> > &track)
             space.erase(space.begin());
         }
         // add separator
-        state.push_back(';');
+        state.push_back((char)elements::StateChars::SEPARATOR);
     }
     // add additional character when the race is over
     if (isRaceOver())
     {
         state.pop_back();
-        state.push_back('<');
+        state.push_back((char)elements::StateChars::WINEND);
     }
     return state;
 }
