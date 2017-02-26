@@ -1,5 +1,8 @@
 #include <track.h>
 
+// adding an extra space on the track to enable "crosssing the finish line"
+#define TRACK_LENGTH (TRACK_SPACES + 1)
+
 Track::Track() : track(TRACK_LENGTH), raceIsOver(false)
 {
 }
@@ -23,78 +26,85 @@ bool Track::isRaceOver()
     return raceIsOver;
 }
 
-int Track::moveFigure(const elements::Figures figure, int spaces)
+unsigned int Track::moveFigure(const elements::Figures figure, unsigned int spaces)
 {
     int triggeredBonusTile = 0;
+    // no moving if the race is over
+    if (isRaceOver())
+    {
+        return triggeredBonusTile;
+    }
     // go through the track spaces
-    for (unsigned int i = 0; i < TRACK_LENGTH; i++)
+    for (size_t i = 0; i < TRACK_SPACES; i++)
     {
         // go through the figures on the given space
-        for (unsigned int j = 0; j < track.at(i).size(); j++)
+        for (size_t j = 0; j < track.at(i).size(); j++)
         {
-            // find match
+            // find matching figure
             if (track.at(i).at(j) == (char)figure)
             {
                 // check if race will be over with this move
-                if ((i + spaces) >= TRACK_LENGTH)
+                if ((i + spaces) >= TRACK_SPACES)
                 {
-                    // adjust to make only one step after finish line
-                    spaces = TRACK_LENGTH - i;
-                    // add extra "space" after finish line
-                    track.push_back({(char) elements::StateChars::WINSTART});
                     raceIsOver = true;
+                    // adjust to make only one step after finish line
+                    spaces = TRACK_SPACES - i;
                 }
-                // check for placed bonus tiles before moving
-                unsigned int plannedSpace = i + spaces;
-                if (!track.at(plannedSpace).empty())
+                else
                 {
-                    char alreadyPlaced = track.at(plannedSpace).at(0);
-                    // if a bonus tile was triggered adjust the steps and return real space instead
-                    // of a vector index
-                    if (alreadyPlaced == (char)elements::BonusTiles::PLUS)
+                    // check for placed bonus tiles before moving
+                    size_t plannedSpace = i + spaces;
+                    if (!track.at(plannedSpace).empty())
                     {
-                        triggeredBonusTile = plannedSpace + 1;
-                        spaces++;
-                    }
-                    if (alreadyPlaced == (char)elements::BonusTiles::MINUS)
-                    {
-                        // TODO handle placement below existing unit
-                        triggeredBonusTile = plannedSpace + 1;
-                        spaces--;
+                        char alreadyPlaced = track.at(plannedSpace).at(0);
+                        // if a bonus tile was triggered we adjust the steps and return real space
+                        // instead of a vector index
+                        if (alreadyPlaced == (char)elements::BonusTiles::PLUS)
+                        {
+                            triggeredBonusTile = plannedSpace + 1;
+                            spaces++;
+                        }
+                        if (alreadyPlaced == (char)elements::BonusTiles::MINUS)
+                        {
+                            // TODO handle placement below existing unit
+                            triggeredBonusTile = plannedSpace + 1;
+                            spaces--;
+                        }
                     }
                 }
-                // now move figure
+                // now move figure/unit
                 auto newSpace = track.at(i + spaces).end();
                 auto thisFigure = track.at(i).begin() + j;
                 auto topFigure = track.at(i).end();
-                int carriedFigures = topFigure - thisFigure;
+                auto carriedFigures = topFigure - thisFigure;
                 // copy to new space
                 track.at(i + spaces).insert(newSpace, thisFigure, topFigure);
                 // erase from old space and exit
                 auto oldSpace = track.at(i).begin() + j;
                 track.at(i).erase(oldSpace, oldSpace + carriedFigures);
-                // we are done
+                // we are done, exit
                 return triggeredBonusTile;
             }
         }
     }
-    // no match for figure means we only started the game, so place figure directly
+    // reaching here means no match for figure since we only started the game,
+    // so place the figure directly
     track.at(spaces - 1).push_back((char)figure);
     return triggeredBonusTile;
 }
 
-int Track::placeBonusTile(const elements::BonusTiles tile, int space)
+int Track::placeBonusTile(const elements::BonusTiles tile, unsigned int space)
 {
     //TODO: handle flipping your existing tile
     //TODO: handle tile ownership
 
-    // real spaces start at 1, but vector indices start at 0
-    space--;
     // check boundaries (also, not allowed to place on space 1)
-    if (space <1 || space >= TRACK_LENGTH)
+    if (space < 2 || space > TRACK_SPACES)
     {
         return -1;
     }
+    // real spaces start at 1, but vector indices start at 0
+    space--;
     // check rules
     if (track.at(space).empty())
     {
@@ -104,7 +114,7 @@ int Track::placeBonusTile(const elements::BonusTiles tile, int space)
             placedLeft = track.at(space - 1).at(0);
         }
         char placedRight = 'X';
-        if (space < (TRACK_LENGTH - 1) && !track.at(space + 1).empty())
+        if (space < (TRACK_SPACES - 1) && !track.at(space + 1).empty())
         {
             placedRight = track.at(space + 1).at(0);
         }
@@ -128,13 +138,19 @@ int Track::placeBonusTile(const elements::BonusTiles tile, int space)
 std::vector<std::vector<char> > Track::stateToTrack(const std::string &state)
 {
     std::vector<std::vector<char>> track(TRACK_LENGTH);
-    int space = 0;
+    size_t space = 0;
     for (char c : state)
     {
         // detect separators to change space
-        if (c == (char)elements::StateChars::SEPARATOR)
+        if (c == (char)elements::State::SEPARATOR)
         {
             space ++;
+            continue;
+        }
+        // skip finish characters
+        else if (c == (char)elements::State::FINSTART ||
+                 c == (char)elements::State::FINEND)
+        {
             continue;
         }
         // otherwise use character as figure
@@ -157,14 +173,17 @@ std::string Track::trackToState(const std::vector<std::vector<char> > &track)
             state.push_back(space.front());
             space.erase(space.begin());
         }
-        // add separator
-        state.push_back((char)elements::StateChars::SEPARATOR);
+        // add separator to end space
+        state.push_back((char)elements::State::SEPARATOR);
     }
-    // add additional character when the race is over
-    if (isRaceOver())
+    // finish space does not need a separator, so remove it
+    state.pop_back();
+    // add finish line characters if there are figures on the finish space
+    if (state.back() != (char)elements::State::SEPARATOR)
     {
-        state.pop_back();
-        state.push_back((char)elements::StateChars::WINEND);
+        size_t finishSpace = state.find_last_of((char)elements::State::SEPARATOR) + 1;
+        state.insert(finishSpace, 1, (char)elements::State::FINSTART);
+        state.push_back((char)elements::State::FINEND);
     }
     return state;
 }

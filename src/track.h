@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#define TRACK_LENGTH 16
+#define TRACK_SPACES 16
 
 /**
  * @brief Class handling the state of the race track.
@@ -41,14 +41,14 @@ public:
      * @param spaces Number of spaces the figure moves.
      * @return Space of a bonus tile on the track if triggered while moving, otherwise 0;
      */
-    int moveFigure(const elements::Figures figure, int spaces);
+    unsigned int moveFigure(const elements::Figures figure, unsigned int spaces);
     /**
      * @brief Places a bonus tile on the given track space.
      * @param tile Bonus tile to place.
      * @param space Space to put the bonus tile on.
      * @return In case of illegal placement -1, otherwise 0.
      */
-    int placeBonusTile(const elements::BonusTiles tile, int space);
+    int placeBonusTile(const elements::BonusTiles tile, unsigned int space);
 
 private:
     std::string state;
