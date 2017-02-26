@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <track.h>
 #include <legdice.h>
+#include <probabilities.h>
 
 #include <iostream>
 
@@ -8,39 +9,65 @@ int main()
 {
     Track track;
     LegDice legdice;
+    std::string figures;
 
-    track.placeBonusTile(elements::BonusTiles::PLUS, 1);
+    // create a list of possible figures
+    figures.push_back((char)elements::Figures::BLUE);
+    figures.push_back((char)elements::Figures::GREEN);
+    figures.push_back((char)elements::Figures::ORANGE);
+    figures.push_back((char)elements::Figures::WHITE);
+    figures.push_back((char)elements::Figures::YELLOW);
+
+    // some random bonus tiles
+    track.placeBonusTile(elements::BonusTiles::PLUS, 5);
     track.placeBonusTile(elements::BonusTiles::MINUS, 10);
 
-    std::cout << "Starting..." << std::endl;
+    std::cout << "==== RACE START ====" << std::endl << std::endl;
 
     while (1)
     {
+        // pretty
         if (legdice.isLegOver())
         {
             legdice.reset();
-            std::cout << "=====================" << std::endl;
+            std::cout << "==== NEW LEG ====" << std::endl << std::endl;
         }
 
+        // show race track status
+        std::cout << "track status: " << track.getState() << std::endl;
+
+        // probabilities for this leg
+        Probabilities p (figures, track.getState(), legdice.getRemainingDice());
+        std::map<char, unsigned int> prediction = p.getLegPrediction();
+        std::cout << "leg probabilitites";
+        for (unsigned int i = 0; i < figures.size(); i++)
+        {
+            std::cout << " | " << figures.at(i) << "=" << prediction[figures.at(i)] << "%";
+        }
+        std::cout << std::endl;
+
+        // reveal next die
         Die die;
         legdice.revealNextDie(die);
 
-        std::cout << "moving " << (char)die.figure << " for " << die.spaces
-                  << " | bonus on " << track.moveFigure(die.figure, die.spaces)
+        // show leg status
+        std::cout << "revealed " << (char)die.figure << die.spaces
+                  << " | bonus hit on " << track.moveFigure(die.figure, die.spaces)
                   << " | dice played " << legdice.getRevealedDice()
-                  << " | dice left " << legdice.getRemainingDice() << std::endl;
-        std::cout << track.getState() << std::endl;
+                  << " | dice left " << legdice.getRemainingDice() << std::endl << std::endl;
 
+
+        // pretty
         if (track.isRaceOver())
         {
-            std::cout << "=====================" << std::endl;
+            std::cout << "track status: " << track.getState() << std::endl;
+            std::cout << "winner: " << track.getState().at(track.getState().find_last_of(figures)) << std::endl;
+            std::cout << std::endl << "==== RACE OVER ====" << std::endl;
             break;
         }
 
-        //sleep(1);
+        sleep(1);
     }
-
-    std::cout << "Done!" << std::endl;
 
     return 0;
 }
