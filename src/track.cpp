@@ -66,29 +66,40 @@ unsigned int Track::moveFigure(const elements::Figures figure, unsigned int spac
                         }
                         if (alreadyPlaced == (char)elements::BonusTiles::MINUS)
                         {
-                            // TODO handle placement below existing unit
                             triggeredBonusTile = plannedSpace + 1;
                             spaces--;
                         }
                     }
                 }
-                // now move figure/unit
-                auto newSpace = track.at(i + spaces).end();
+                // now prepare to move figure/unit
                 auto thisFigure = track.at(i).begin() + j;
-                auto topFigure = track.at(i).end();
-                auto carriedFigures = topFigure - thisFigure;
-                // copy to new space
-                track.at(i + spaces).insert(newSpace, thisFigure, topFigure);
-                // erase from old space and exit
+                auto topUnitFigure = track.at(i).end();
+                auto unitSize = topUnitFigure - thisFigure;
+
+                // usually the figure is placed on top of others...
+                auto newSpace = track.at(i + spaces).end();
+                // ...but must be placed below others if bouncing back from a negative bonus tile
+                if (triggeredBonusTile > 0 &&
+                    track.at(triggeredBonusTile - 1).at(0) == (char)elements::BonusTiles::MINUS)
+                {
+                    newSpace = track.at(i + spaces).begin();
+                }
+
+                // make a copy of the moving unit
+                std::vector<char> unitCopy(thisFigure, topUnitFigure);
+                // erase unit from the old space
                 auto oldSpace = track.at(i).begin() + j;
-                track.at(i).erase(oldSpace, oldSpace + carriedFigures);
-                // we are done, exit
+                track.at(i).erase(oldSpace, oldSpace + unitSize);
+                // now place unit on the new space
+                track.at(i + spaces).insert(newSpace, unitCopy.begin(), unitCopy.end());
+
+                // we are done with this figure, exit
                 return triggeredBonusTile;
             }
         }
     }
     // reaching here means no match for figure since we only started the game,
-    // so place the figure directly
+    // so place the figure directly and exit
     track.at(spaces - 1).push_back((char)figure);
     return triggeredBonusTile;
 }
