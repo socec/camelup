@@ -104,20 +104,37 @@ unsigned int Track::moveFigure(const elements::Figures figure, unsigned int spac
     return triggeredBonusTile;
 }
 
-int Track::placeBonusTile(const elements::BonusTiles tile, unsigned int space)
+int Track::placeBonusTile(const elements::BonusTiles tile, unsigned int space, bool flipExisting)
 {
-    //TODO: handle flipping your existing tile
-    //TODO: handle tile ownership
-
-    // check boundaries (also, not allowed to place on space 1)
+    // check boundaries (not allowed to place on space 1)
     if (space < 2 || space > TRACK_SPACES)
     {
         return -1;
     }
     // real spaces start at 1, but vector indices start at 0
     space--;
-    // check rules
-    if (track.at(space).empty())
+
+    // check placement rules...
+
+    // existing tiles can be flipped
+    if (!track.at(space).empty())
+    {
+        if (flipExisting)
+        {
+            char placed = track.at(space).at(0);
+            // check that we are actually flipping an existing tile
+            if ((placed != (char)tile) &&
+                (placed == (char)elements::BonusTiles::PLUS ||
+                 placed == (char)elements::BonusTiles::MINUS))
+            {
+                track.at(space).at(0) = (char)tile;
+                return 0;
+            }
+        }
+        return -1;
+    }
+    // otherwise place a tile on an empty space
+    else
     {
         char placedLeft = 'X';
         if (space > 1 && !track.at(space - 1).empty())
@@ -143,7 +160,6 @@ int Track::placeBonusTile(const elements::BonusTiles tile, unsigned int space)
             return -1;
         }
     }
-    return -1;
 }
 
 std::vector<std::vector<char> > Track::stateToTrack(const std::string &state)

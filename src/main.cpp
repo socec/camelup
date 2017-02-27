@@ -19,8 +19,8 @@ int main()
     figures.push_back((char)elements::Figures::YELLOW);
 
     // some random bonus tiles
-    track.placeBonusTile(elements::BonusTiles::PLUS, 5);
-    track.placeBonusTile(elements::BonusTiles::MINUS, 10);
+    track.placeBonusTile(elements::BonusTiles::PLUS, 5, false);
+    track.placeBonusTile(elements::BonusTiles::MINUS, 10, false);
 
     std::cout << "==== RACE START ====" << std::endl << std::endl;
 

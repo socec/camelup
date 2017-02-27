@@ -43,12 +43,13 @@ public:
      */
     unsigned int moveFigure(const elements::Figures figure, unsigned int spaces);
     /**
-     * @brief Places a bonus tile on the given track space.
+     * @brief Places a bonus tile on the given track space. Existing tiles can be flipped.
      * @param tile Bonus tile to place.
      * @param space Space to put the bonus tile on.
+     * @param flipExisting True if flipping an existing tile, false otherwise.
      * @return In case of illegal placement -1, otherwise 0.
      */
-    int placeBonusTile(const elements::BonusTiles tile, unsigned int space);
+    int placeBonusTile(const elements::BonusTiles tile, unsigned int space, bool flipExisting);
 
 private:
     std::string state;
