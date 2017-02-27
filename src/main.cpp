@@ -44,14 +44,16 @@ int main()
         {
             std::cout << " | " << figures.at(i) << "=" << prediction[figures.at(i)] << "%";
         }
-        std::cout << std::endl;
+        std::cout << std::endl << std::endl;
+
+        sleep(1);
 
         // reveal next die
         Die die;
         legdice.revealNextDie(die);
 
         // show leg status
-        std::cout << "revealed " << (char)die.figure << die.spaces
+        std::cout << "-> revealed " << (char)die.figure << die.spaces
                   << " | bonus hit on " << track.moveFigure(die.figure, die.spaces)
                   << " | dice played " << legdice.getRevealedDice()
                   << " | dice left " << legdice.getRemainingDice() << std::endl << std::endl;
@@ -65,8 +67,6 @@ int main()
             std::cout << std::endl << "==== RACE OVER ====" << std::endl;
             break;
         }
-
-        sleep(1);
     }
 
     return 0;
